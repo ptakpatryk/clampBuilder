@@ -1,0 +1,15 @@
+h1 {
+    color: #fff;
+    font-size: 5rem;
+    text-shadow: 5px 5px 5px darken(salmon, 3%);
+    text-align: center;
+}
+
+.sanity-div {
+    background-color: salmon;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

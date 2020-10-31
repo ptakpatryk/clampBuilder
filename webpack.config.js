@@ -1,8 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-
-
-
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /*
  * SplitChunksPlugin is enabled by default and replaced
@@ -28,9 +26,6 @@ const webpack = require('webpack');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-
-
-
 /*
  * We've enabled TerserPlugin for you! This minifies your app
  * in order to load faster and run less javascript.
@@ -41,9 +36,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const TerserPlugin = require('terser-webpack-plugin');
 
-
-
-
 module.exports = {
   mode: 'development',
 
@@ -52,42 +44,94 @@ module.exports = {
   },
 
   output: {
-    path: path.resolve(__dirname, 'dist/js')
+    path: path.resolve(__dirname, 'dist'),
+    filename: './js/bundle.js'
   },
 
   plugins: [
     new webpack.ProgressPlugin(),
-    new MiniCssExtractPlugin({ filename:'style.[chunkhash].css' })
+    new MiniCssExtractPlugin({ filename: 'style.[chunkhash].css' }),
   ],
 
   module: {
-    rules: [{
-      test: /\.(js|jsx)$/,
-      include: [path.resolve(__dirname, 'src')],
-      loader: 'babel-loader'
-    }, {
-      test: /.(scss|css)$/,
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        include: [path.resolve(__dirname, 'src')],
+        loader: 'babel-loader',
+      },
+      {
+        test: /\.html$/i,
+        use: [
+          {
+            loader: 'html-loader',
+            options: {
+              minimize: true,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'img',
+              publicPath: './img',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          // {
+          //   loader: 'style-loader',
+          // },
+          {
+            loader: 'css-loader',
 
-      use: [{
-        loader: MiniCssExtractPlugin.loader
-      }, {
-        loader: "style-loader"
-      }, {
-        loader: "css-loader",
+            options: {
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  [
+                    'autoprefixer'
+                  ],
+                ],
+              },
+            },
+          },
+          {
+            loader: 'sass-loader',
 
-        options: {
-          sourceMap: true
-        }
-      }, {
-        loader: "sass-loader",
-
-        options: {
-          sourceMap: true
-        }
-      }]
-    }]
+            options: {
+              implementation: require('sass'),
+              sourceMap: true,
+            },
+          },
+        ],
+      },
+    ],
   },
-
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: './style/bundle.css',
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      filename: 'index.html'
+    })
+  ],
   optimization: {
     minimizer: [new TerserPlugin()],
 
@@ -95,14 +139,19 @@ module.exports = {
       cacheGroups: {
         vendors: {
           priority: -10,
-          test: /[\\/]node_modules[\\/]/
-        }
+          test: /[\\/]node_modules[\\/]/,
+        },
       },
 
       chunks: 'async',
       minChunks: 1,
       minSize: 30000,
-      name: true
-    }
+      // name: true
+    },
+  },
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 9000
   }
-}
+};

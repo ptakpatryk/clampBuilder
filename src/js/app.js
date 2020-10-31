@@ -1,10 +1,6 @@
-function component() {
-  const element = document.createElement('div');
+import '../styles/style.scss';
+import { value } from './visualController';
 
-  // Lodash, currently included via a script, is required for this line to work
-  element.innerHTML = _.join(['Hello', 'webpack'], ' ');
+console.log(value)
 
-  return element;
-}
 
-document.body.appendChild(component());
